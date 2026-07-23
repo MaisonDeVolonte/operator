@@ -57,7 +57,7 @@
 - list files touched by a shipped feature in ideal-build order
 - for building a mental model, not for reference docs
 
-## Architecture
+## Conventions
 `@retardify` applies every rule below (Files, Wayfinding, Module Order, Comments, Code) to one target file or function:
 - rename the file if its casing/extension violates `Files`
 - resync the `Wayfinding` header's @description/@see with the file as it now stands
