@@ -2,7 +2,7 @@
   "permissions": {
     "allow": [
       "Skill(claude-api)",
-      "Bash(AGENTS/*)",
+      "Bash(AGENTS/**)",
       "Edit(AGENTS/logs/**)", "Write(AGENTS/logs/**)",
       "Edit(AGENTS/prompts/**)", "Write(AGENTS/prompts/**)",
       "Edit(AGENTS/plans/**)", "Write(AGENTS/plans/**)",

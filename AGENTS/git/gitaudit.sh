@@ -17,6 +17,7 @@ git remote set-head origin --auto >/dev/null 2>&1 || true
 DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@')
 DEFAULT_BRANCH=${DEFAULT_BRANCH:-main}
 CURRENT_BRANCH=$(git branch --show-current)
+PROTECTED="$DEFAULT_BRANCH|production"
 git fetch --prune origin >/dev/null 2>&1 || true
 
 # local: current branch, last activity, staged/unstaged/untracked files, hidden stashes
@@ -73,6 +74,17 @@ for branch in $(git for-each-ref --sort=-committerdate --format='%(refname:short
   if git rev-parse --verify --quiet "refs/remotes/origin/$branch" >/dev/null; then B_REMOTE=yes; else B_REMOTE=no; fi
   if git cherry "$DEFAULT_BRANCH" "$branch" 2>/dev/null | grep -q '^+'; then B_MERGED=no; else B_MERGED=yes; fi
   echo "branch: $branch | last: $B_LAST | ahead: $B_AHEAD | upstream: ${B_TRACK:-none} | reachable: $B_REACHABLE | remote: $B_REMOTE | merged: $B_MERGED | last_commit: $(git log -1 --format='%s' "$branch" 2>/dev/null)"
+done
+
+# remote-only: branches on origin with no local counterpart, never reported by the loop above
+echo "--- remote-only ---"
+for branch in $(git for-each-ref --sort=-committerdate --format='%(refname)' refs/remotes/origin/ | sed 's@^refs/remotes/origin/@@' | grep -vx HEAD | grep -vxE "$PROTECTED"); do
+  git show-ref --verify --quiet "refs/heads/$branch" && continue
+  R_LAST=$(git log -1 --format='%cr' "origin/$branch" 2>/dev/null || echo n/a)
+  R_AHEAD=$(git rev-list --count "origin/$DEFAULT_BRANCH..origin/$branch" 2>/dev/null || echo '?')
+  if git merge-base --is-ancestor "origin/$branch" "origin/$DEFAULT_BRANCH" 2>/dev/null; then R_REACHABLE=yes; else R_REACHABLE=no; fi
+  if git cherry "origin/$DEFAULT_BRANCH" "origin/$branch" 2>/dev/null | grep -q '^+'; then R_MERGED=no; else R_MERGED=yes; fi
+  echo "remote_branch: $branch | last: $R_LAST | ahead: $R_AHEAD | reachable: $R_REACHABLE | merged: $R_MERGED | last_commit: $(git log -1 --format='%s' "origin/$branch" 2>/dev/null)"
 done
 
 echo "--- end ---"

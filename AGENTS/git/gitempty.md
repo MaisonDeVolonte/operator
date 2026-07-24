@@ -48,4 +48,7 @@
 
     - zombie deletions: merged = yes (squash/rebase), reachable = no, and remote = yes (still on GitHub)
       - `branch_name` → `git push origin --delete branch_name && git branch -D branch_name`
+
+    - remote only deletions: listed under `--- remote-only ---` with merged = yes, no local branch
+      - `branch_name` → `git push origin --delete branch_name`
     ```
